@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@property --hue {
+  syntax: '<number>';
+  initial-value: 260;
+  inherits: false;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-family: system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.animated-bg {
+  animation: hue-shift 20s linear infinite alternate;
+}
+
+@keyframes hue-shift {
+  0%   { --hue: 255; }
+  100% { --hue: 285; }
+}
