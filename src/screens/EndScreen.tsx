@@ -20,7 +20,7 @@ function formatDuration(s: number): string {
 export function EndScreen({ mode, durationSeconds, onDone }: Props) {
   useEffect(() => {
     const chime = new Howl({
-      src: ['/sounds/chime.mp3'],
+      src: [`${import.meta.env.BASE_URL}sounds/chime.mp3`],
       volume: 0.6,
     })
     chime.play()

@@ -7,7 +7,7 @@ export function useAmbientSound() {
 
   useEffect(() => {
     const h = new Howl({
-      src: ['/sounds/rain.mp3'],
+      src: [`${import.meta.env.BASE_URL}sounds/rain.mp3`],
       loop: true,
       volume: 0,
     })
