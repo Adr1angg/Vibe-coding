@@ -1,5 +1,4 @@
-import { useRef, useCallback, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useRef, useCallback } from 'react'
 
 interface Props {
   value: number // seconds
@@ -9,23 +8,22 @@ interface Props {
 }
 
 const TWO_PI = Math.PI * 2
-const START_ANGLE = -Math.PI / 2 // 12 o'clock
+const START_ANGLE = (2 * Math.PI) / 3  // 7 o'clock
+const SWEEP = (300 / 360) * TWO_PI     // 300° arc — no wrap-around
 
 function angleToValue(angle: number, min: number, max: number): number {
   let norm = (angle - START_ANGLE + TWO_PI) % TWO_PI
-  return Math.round(min + (norm / TWO_PI) * (max - min))
+  norm = Math.min(Math.max(norm, 0), SWEEP)
+  const raw = min + (norm / SWEEP) * (max - min)
+  return Math.round(raw / 60) * 60 // snap to whole minutes
 }
 
 function valueToAngle(value: number, min: number, max: number): number {
-  const norm = (value - min) / (max - min)
-  return START_ANGLE + norm * TWO_PI
+  return START_ANGLE + ((value - min) / (max - min)) * SWEEP
 }
 
 function formatTime(seconds: number): string {
-  const m = Math.floor(seconds / 60)
-  const s = seconds % 60
-  if (s === 0) return `${m} min`
-  return `${m}:${String(s).padStart(2, '0')}`
+  return `${Math.round(seconds / 60)} min`
 }
 
 function describeArc(cx: number, cy: number, r: number, startAngle: number, endAngle: number) {
@@ -45,7 +43,6 @@ const TRACK_R = 120
 export function TimeDial({ value, min, max, onChange }: Props) {
   const svgRef = useRef<SVGSVGElement>(null)
   const dragging = useRef(false)
-  const [extended, setExtended] = useState(false)
 
   const getAngleFromEvent = useCallback((e: PointerEvent | React.PointerEvent) => {
     if (!svgRef.current) return 0
@@ -78,10 +75,11 @@ export function TimeDial({ value, min, max, onChange }: Props) {
   const thumbX = CX + R * Math.cos(thumbAngle)
   const thumbY = CY + R * Math.sin(thumbAngle)
 
-  const arcEnd = thumbAngle
-  const arcPath = describeArc(CX, CY, TRACK_R, START_ANGLE, arcEnd <= START_ANGLE ? START_ANGLE + 0.001 : arcEnd)
-
-  const atMax = value >= max
+  const trackEnd = START_ANGLE + SWEEP
+  const trackPath = describeArc(CX, CY, TRACK_R, START_ANGLE, trackEnd)
+  const arcPath = value <= min
+    ? ''
+    : describeArc(CX, CY, TRACK_R, START_ANGLE, thumbAngle)
 
   return (
     <div className="relative flex flex-col items-center">
@@ -103,31 +101,34 @@ export function TimeDial({ value, min, max, onChange }: Props) {
             </feMerge>
           </filter>
           <linearGradient id="arcGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#e879f9" />
-            <stop offset="100%" stopColor="#818cf8" />
+            <stop offset="0%" stopColor="#2dd4bf" />
+            <stop offset="100%" stopColor="#22d3ee" />
           </linearGradient>
         </defs>
 
         {/* Track */}
-        <circle
-          cx={CX} cy={CY} r={TRACK_R}
+        <path
+          d={trackPath}
           fill="none"
           stroke="rgba(255,255,255,0.08)"
-          strokeWidth="4"
-        />
-
-        {/* Filled arc */}
-        <path
-          d={arcPath}
-          fill="none"
-          stroke="url(#arcGrad)"
           strokeWidth="4"
           strokeLinecap="round"
         />
 
+        {/* Filled arc */}
+        {arcPath && (
+          <path
+            d={arcPath}
+            fill="none"
+            stroke="url(#arcGrad)"
+            strokeWidth="4"
+            strokeLinecap="round"
+          />
+        )}
+
         {/* Center time display */}
         <text
-          x={CX} y={CY - 8}
+          x={CX} y={CY}
           textAnchor="middle"
           dominantBaseline="middle"
           fill="white"
@@ -138,43 +139,14 @@ export function TimeDial({ value, min, max, onChange }: Props) {
         >
           {formatTime(value)}
         </text>
-        <text
-          x={CX} y={CY + 22}
-          textAnchor="middle"
-          dominantBaseline="middle"
-          fill="rgba(255,255,255,0.35)"
-          fontSize="11"
-          style={{ fontFamily: 'system-ui, sans-serif' }}
-        >
-          {value < 60 ? 'seconds' : ''}
-        </text>
 
         {/* Thumb dot */}
         <circle
           cx={thumbX} cy={thumbY} r="10"
-          fill="#e879f9"
+          fill="#2dd4bf"
           filter="url(#thumb-glow)"
         />
       </svg>
-
-      {/* Extend time tab */}
-      <AnimatePresence>
-        {atMax && (
-          <motion.button
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 8 }}
-            transition={{ duration: 0.25 }}
-            onClick={() => {
-              setExtended(true)
-              onChange(max)
-            }}
-            className="mt-2 px-4 py-1.5 rounded-full text-sm text-white/60 border border-white/15 backdrop-blur-sm hover:border-white/30 hover:text-white/90 transition-colors"
-          >
-            {extended ? 'Max extended' : 'More time →'}
-          </motion.button>
-        )}
-      </AnimatePresence>
     </div>
   )
 }

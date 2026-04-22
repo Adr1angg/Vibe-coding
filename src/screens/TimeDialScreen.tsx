@@ -54,8 +54,8 @@ export function TimeDialScreen({ mode, onBack, onStart }: Props) {
           onClick={() => onStart(value)}
           className="mt-2 px-12 py-4 rounded-full text-white/90 tracking-widest text-sm uppercase font-light transition-all"
           style={{
-            background: 'linear-gradient(135deg, rgba(232,121,249,0.2), rgba(129,140,248,0.2))',
-            border: '1px solid rgba(232,121,249,0.3)',
+            background: 'linear-gradient(135deg, rgba(45,212,191,0.2), rgba(34,211,238,0.2))',
+            border: '1px solid rgba(45,212,191,0.3)',
             backdropFilter: 'blur(12px)',
           }}
         >

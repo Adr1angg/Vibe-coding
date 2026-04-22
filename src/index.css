@@ -21,6 +21,6 @@ html, body, #root {
 }
 
 @keyframes hue-shift {
-  0%   { --hue: 255; }
-  100% { --hue: 285; }
+  0%   { --hue: 170; }
+  100% { --hue: 195; }
 }

@@ -94,9 +94,9 @@ export function MandalaSVG({ mode, phase, opacity = 1 }: Props) {
             </feMerge>
           </filter>
           <linearGradient id="petalGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#e879f9" />
-            <stop offset="50%" stopColor="#818cf8" />
-            <stop offset="100%" stopColor="#38bdf8" />
+            <stop offset="0%" stopColor="#2dd4bf" />
+            <stop offset="50%" stopColor="#22d3ee" />
+            <stop offset="100%" stopColor="#34d399" />
           </linearGradient>
         </defs>
 
